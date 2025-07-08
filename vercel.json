@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/check-reminders",
-      "schedule": "* * * * *" // Run every minute
+      "schedule": "* * * * *"
     }
   ]
 }
