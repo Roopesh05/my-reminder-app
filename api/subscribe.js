@@ -1,4 +1,5 @@
 const webpush = require('web-push');
+const { createClient } = require('@supabase/supabase-js');
 
 const publicVapidKey = process.env.VAPID_PUBLIC_KEY || 'BPIRTqVASFkgZXN7ZxhnAggIyVRH6odSACevMoSKKnOpjmfxXrebjNIFPNyQ0Ug6hdQBxQFXeYUBdj5pRI6XfSM';
 const privateVapidKey = process.env.VAPID_PRIVATE_KEY || 'VlmDYHGprGSTxeecy63s7vqNbJ_76b7LASZh_e6PijM';
@@ -9,18 +10,37 @@ webpush.setVapidDetails(
   privateVapidKey
 );
 
-// In a real application, you would store these subscriptions in a database.
-// For this example, we'll use a simple in-memory array. This means subscriptions
-// will be lost if the serverless function instance is reset.
-const subscriptions = [];
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   console.log('subscribe.js function invoked');
   if (req.method === 'POST') {
     const subscription = req.body;
-    subscriptions.push(subscription);
-    console.log('Subscription added:', subscription);
-    res.status(201).json({});
+
+    try {
+      // Store the subscription in Supabase
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .insert({
+          endpoint: subscription.endpoint,
+          p256dh: subscription.keys.p256dh,
+          auth: subscription.keys.auth,
+        });
+
+      if (error) {
+        console.error('Error storing subscription:', error);
+        return res.status(500).json({ error: 'Failed to store subscription.' });
+      }
+
+      console.log('Subscription added to Supabase:', data);
+      res.status(201).json({});
+    } catch (e) {
+      console.error('Caught error in subscribe.js:', e);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   } else {
     res.status(405).json({ error: 'Method Not Allowed' });
   }
