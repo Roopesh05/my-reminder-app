@@ -17,40 +17,21 @@ module.exports = async (req, res) => {
     // In a real application, you would save the reminder and schedule a job
     // to send the push notification at the specified reminderDate.
     // For this example, we'll simulate scheduling by setting a timeout.
-    const delay = new Date(reminderDate).getTime() - Date.now();
-
     console.log('Received subscription:', subscription);
     console.log('Reminder text:', reminderText);
     console.log('Reminder date:', reminderDate);
 
     const payload = JSON.stringify({ title: 'Reminder!', body: reminderText });
 
-    if (delay < 0) {
-      // If the reminder date is in the past, send immediately
-      try {
-        console.log('Attempting to send immediate notification...');
-        await webpush.sendNotification(subscription, payload);
-        console.log('Immediate notification sent:', reminderText);
-        res.status(200).json({ message: 'Immediate reminder sent.' });
-      } catch (error) {
-        console.error('Error sending immediate notification:', error);
-        console.error('WebPush error details:', error.body); // Log error body for more details
-        res.status(500).json({ error: 'Failed to send immediate notification.' });
-      }
-    } else {
-      // Schedule the notification
-      setTimeout(async () => {
-        try {
-          console.log('Attempting to send scheduled notification...');
-          await webpush.sendNotification(subscription, payload);
-          console.log('Scheduled notification sent:', reminderText);
-        } catch (error) {
-          console.error('Error sending scheduled notification:', error);
-          console.error('WebPush error details:', error.body); // Log error body for more details
-        }
-      }, delay);
-
-      res.status(200).json({ message: 'Reminder scheduled.' });
+    try {
+      console.log('Attempting to send notification immediately for testing...');
+      await webpush.sendNotification(subscription, payload);
+      console.log('Notification sent successfully for:', reminderText);
+      res.status(200).json({ message: 'Notification sent immediately for testing.' });
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      console.error('WebPush error details:', error.body); // Log error body for more details
+      res.status(500).json({ error: 'Failed to send notification immediately.' });
     }
   } else {
     res.status(405).json({ error: 'Method Not Allowed' });
