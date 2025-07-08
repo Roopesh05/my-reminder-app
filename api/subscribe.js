@@ -15,6 +15,7 @@ webpush.setVapidDetails(
 const subscriptions = [];
 
 module.exports = (req, res) => {
+  console.log('subscribe.js function invoked');
   if (req.method === 'POST') {
     const subscription = req.body;
     subscriptions.push(subscription);

@@ -10,6 +10,7 @@ webpush.setVapidDetails(
 );
 
 module.exports = async (req, res) => {
+  console.log('schedule-reminder.js function invoked');
   if (req.method === 'POST') {
     const { subscription, reminderText, reminderDate } = req.body;
 
