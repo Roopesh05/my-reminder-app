@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
         .from('reminders')
         .insert({
           text: reminderText,
-          date: reminderDate,
+          date: new Date(reminderDate).toISOString(),
           subscription: subscription, // Store the full subscription object
           sent: false,
         });
